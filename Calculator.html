@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dark Interest Calculator</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      color: #ffffff;
+    }
+
+    .calculator {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(10px);
+      max-width: 450px;
+      width: 100%;
+    }
+
+    .calculator h2 {
+      text-align: center;
+      margin-bottom: 25px;
+      font-weight: 600;
+    }
+
+    .input-group {
+      margin-bottom: 15px;
+    }
+
+    .input-group label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 0.95em;
+    }
+
+    .input-group input, .input-group select {
+      width: 100%;
+      padding: 10px;
+      background-color: rgba(255, 255, 255, 0.1);
+      border: none;
+      border-radius: 10px;
+      color: white;
+      font-size: 1em;
+    }
+
+    .input-group input::placeholder {
+      color: #ccc;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px;
+      background: #00c6ff;
+      border: none;
+      border-radius: 10px;
+      font-size: 1em;
+      font-weight: bold;
+      color: #000;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .btn:hover {
+      background: #00b0e6;
+    }
+
+    .result {
+      margin-top: 20px;
+      text-align: center;
+      font-size: 1.1em;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+<div class="calculator">
+  <h2>Interest Calculator (Dark Mode)</h2>
+  
+  <div class="input-group">
+    <label for="type">Interest Type</label>
+    <select id="type">
+      <option value="simple">Simple Interest</option>
+      <option value="compound">Compound Interest</option>
+    </select>
+  </div>
+
+  <div class="input-group">
+    <label for="principal">Principal Amount (₹)</label>
+    <input type="number" id="principal" placeholder="Enter principal amount" />
+  </div>
+
+  <div class="input-group">
+    <label for="rate">Annual Interest Rate (%)</label>
+    <input type="number" id="rate" placeholder="Enter annual rate" />
+  </div>
+
+  <div class="input-group">
+    <label for="start">Start Date</label>
+    <input type="date" id="start" />
+  </div>
+
+  <div class="input-group">
+    <label for="end">End Date</label>
+    <input type="date" id="end" />
+  </div>
+
+  <div class="input-group" id="compoundFreq" style="display:none;">
+    <label for="frequency">Compounded (per year)</label>
+    <input type="number" id="frequency" placeholder="E.g. 1 for yearly, 4 for quarterly" />
+  </div>
+
+  <button class="btn" onclick="calculate()">Calculate</button>
+
+  <div class="result" id="result">Result will appear here</div>
+</div>
+
+<script>
+  const typeSelect = document.getElementById("type");
+  const compoundFreq = document.getElementById("compoundFreq");
+
+  typeSelect.addEventListener("change", () => {
+    compoundFreq.style.display = typeSelect.value === "compound" ? "block" : "none";
+  });
+
+  function calculateYears(startDate, endDate) {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const diffTime = Math.abs(end - start);
+    const diffYears = diffTime / (1000 * 60 * 60 * 24 * 365.25);
+    return diffYears;
+  }
+
+  function calculate() {
+    const type = document.getElementById("type").value;
+    const P = parseFloat(document.getElementById("principal").value);
+    const R = parseFloat(document.getElementById("rate").value);
+    const start = document.getElementById("start").value;
+    const end = document.getElementById("end").value;
+    const freq = parseFloat(document.getElementById("frequency").value || 1);
+
+    const resultDiv = document.getElementById("result");
+
+    if (!P || !R || !start || !end) {
+      resultDiv.innerHTML = "❗ Please fill all required fields.";
+      return;
+    }
+
+    const T = calculateYears(start, end);
+    let result = "";
+
+    if (type === "simple") {
+      const SI = (P * R * T) / 100;
+      result = `Simple Interest: ₹${SI.toFixed(2)}<br>Total Amount: ₹${(P + SI).toFixed(2)}<br>Time: ${T.toFixed(2)} years`;
+    } else {
+      if (!freq || freq <= 0) {
+        resultDiv.innerHTML = "❗ Enter a valid compounding frequency.";
+        return;
+      }
+      const CI = P * Math.pow((1 + R / (100 * freq)), freq * T) - P;
+      result = `Compound Interest: ₹${CI.toFixed(2)}<br>Total Amount: ₹${(P + CI).toFixed(2)}<br>Time: ${T.toFixed(2)} years`;
+    }
+
+    resultDiv.innerHTML = result;
+  }
+</script>
+
+</body>
+</html>
